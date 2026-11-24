@@ -1,0 +1,18 @@
+# Dependencies and npm logs
+node_modules/
+.env
+.env.*
+!.env.example
+.wrangler/
+
+# Local originals and generated sites
+pic/
+dist/
+
+# Temporary build files
+.frame-build-*/
+.frame-sync-*/
+annotations.json.*.tmp
+
+# OS metadata
+.DS_Store

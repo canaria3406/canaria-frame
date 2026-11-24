@@ -1,0 +1,257 @@
+{
+  "DSCF0458.jpg": {
+    "prefectureID": "ishikawa",
+    "prefecture": {
+      "zh-Hant": "石川縣",
+      "ja": "石川県",
+      "en": "Ishikawa"
+    },
+    "city": {
+      "zh-Hant": "金澤市",
+      "ja": "金沢市",
+      "en": "Kanazawa"
+    },
+    "location": {
+      "zh-Hant": "東茶屋街",
+      "ja": "ひがし茶屋街",
+      "en": "Higashi Chaya District"
+    },
+    "originalSha256": "5bd079da829a9e7ea726d379c67ba199b4fd90d36a04100d3b03ce263e5fa462"
+  },
+  "DSCF0463.jpg": {
+    "prefectureID": "ishikawa",
+    "prefecture": {
+      "zh-Hant": "石川縣",
+      "ja": "石川県",
+      "en": "Ishikawa"
+    },
+    "city": {
+      "zh-Hant": "金澤市",
+      "ja": "金沢市",
+      "en": "Kanazawa"
+    },
+    "location": {
+      "zh-Hant": "淺野川",
+      "ja": "浅野川",
+      "en": "Asanogawa River"
+    },
+    "originalSha256": "e20f528c10f41d3cdc443b8b19805f54b5198b5dfcfdfc93eee976d85bc6c1e7"
+  },
+  "DSCF0506.jpg": {
+    "prefectureID": "ishikawa",
+    "prefecture": {
+      "zh-Hant": "石川縣",
+      "ja": "石川県",
+      "en": "Ishikawa"
+    },
+    "city": {
+      "zh-Hant": "白山市",
+      "ja": "白山市",
+      "en": "Hakusan"
+    },
+    "location": {
+      "zh-Hant": "德光海岸",
+      "ja": "徳光海岸",
+      "en": "Tokumitsu Beach"
+    },
+    "originalSha256": "f2062537afc7fbda2c0636c10549a5df9a1a80658dc710c5d4d2dc32777ffe4b"
+  },
+  "DSCF0532.jpg": {
+    "prefectureID": "ishikawa",
+    "prefecture": {
+      "zh-Hant": "石川縣",
+      "ja": "石川県",
+      "en": "Ishikawa"
+    },
+    "city": {
+      "zh-Hant": "金澤市",
+      "ja": "金沢市",
+      "en": "Kanazawa"
+    },
+    "location": {
+      "zh-Hant": "廣坂",
+      "ja": "広坂",
+      "en": "Hirozaka"
+    },
+    "originalSha256": "1b545a6c6dc0f4b1a995f843668d6425849c1a658c1084ce0e9b1fe875127736"
+  },
+  "DSCF0542.jpg": {
+    "prefectureID": "ishikawa",
+    "prefecture": {
+      "zh-Hant": "石川縣",
+      "ja": "石川県",
+      "en": "Ishikawa"
+    },
+    "city": {
+      "zh-Hant": "金澤市",
+      "ja": "金沢市",
+      "en": "Kanazawa"
+    },
+    "location": {
+      "zh-Hant": "廣坂",
+      "ja": "広坂",
+      "en": "Hirozaka"
+    },
+    "originalSha256": "b2c97c1ff253fd2572ad1980089ce003e08b00f5dd4b20f3b37670d036b4074a"
+  },
+  "DSCF0569.jpg": {
+    "deleted": true,
+    "r2Deletion": "complete"
+  },
+  "DSCF0590.jpg": {
+    "prefectureID": "ishikawa",
+    "prefecture": {
+      "zh-Hant": "石川縣",
+      "ja": "石川県",
+      "en": "Ishikawa"
+    },
+    "city": {
+      "zh-Hant": "金澤市",
+      "ja": "金沢市",
+      "en": "Kanazawa"
+    },
+    "location": {
+      "zh-Hant": "兼六園",
+      "ja": "兼六園",
+      "en": "Kenrokuen Garden"
+    },
+    "originalSha256": "218bad609c4b2ad6c3489617685b15de9530ca821c3e2669745d2a0432606f31"
+  },
+  "DSCF0624.jpg": {
+    "prefectureID": "ishikawa",
+    "prefecture": {
+      "zh-Hant": "石川縣",
+      "ja": "石川県",
+      "en": "Ishikawa"
+    },
+    "city": {
+      "zh-Hant": "金澤市",
+      "ja": "金沢市",
+      "en": "Kanazawa"
+    },
+    "location": {
+      "zh-Hant": "兼六園",
+      "ja": "兼六園",
+      "en": "Kenrokuen Garden"
+    },
+    "originalSha256": "594607154840f2785126b85df1e6a4733ad70204480cba41845e289811561fa1"
+  },
+  "DSCF0628.jpg": {
+    "deleted": true,
+    "r2Deletion": "complete"
+  },
+  "DSCF0654.jpg": {
+    "prefectureID": "ishikawa",
+    "prefecture": {
+      "zh-Hant": "石川縣",
+      "ja": "石川県",
+      "en": "Ishikawa"
+    },
+    "city": {
+      "zh-Hant": "金澤市",
+      "ja": "金沢市",
+      "en": "Kanazawa"
+    },
+    "location": {
+      "zh-Hant": "兼六園",
+      "ja": "兼六園",
+      "en": "Kenrokuen Garden"
+    },
+    "originalSha256": "0f195d69aebe3ebae7b601e899a9f87edd702233ec1e96644a737f5ceb6c01ad"
+  },
+  "DSCF0669.jpg": {
+    "prefectureID": "ishikawa",
+    "prefecture": {
+      "zh-Hant": "石川縣",
+      "ja": "石川県",
+      "en": "Ishikawa"
+    },
+    "city": {
+      "zh-Hant": "金澤市",
+      "ja": "金沢市",
+      "en": "Kanazawa"
+    },
+    "location": {
+      "zh-Hant": "廣坂",
+      "ja": "広坂",
+      "en": "Hirozaka"
+    },
+    "originalSha256": "92a56b0614badb94090ad8712dcd25e48547fdcc63190a86e113d9363cb1aed6"
+  },
+  "DSCF0679.jpg": {
+    "prefectureID": "ishikawa",
+    "prefecture": {
+      "zh-Hant": "石川縣",
+      "ja": "石川県",
+      "en": "Ishikawa"
+    },
+    "city": {
+      "zh-Hant": "金澤市",
+      "ja": "金沢市",
+      "en": "Kanazawa"
+    },
+    "location": {
+      "zh-Hant": "廣坂",
+      "ja": "広坂",
+      "en": "Hirozaka"
+    },
+    "originalSha256": "22a09c9099414e95cbce4724ab7dabe6e4ec1147a54163ded268c8c3de9af002"
+  },
+  "DSCF0807.jpg": {
+    "prefectureID": "hyogo",
+    "prefecture": {
+      "zh-Hant": "兵庫縣",
+      "ja": "兵庫県",
+      "en": "Hyogo"
+    },
+    "city": {
+      "zh-Hant": "神戶市",
+      "ja": "神戸市",
+      "en": "Kobe"
+    },
+    "location": {
+      "zh-Hant": "神戶港",
+      "ja": "神戸港",
+      "en": "Kobe Harbor"
+    },
+    "originalSha256": "e5f8d402617a3ea6cfbdead8dd115ab7fb4d0ff800f4a5ed65adeeec1372fc9a"
+  },
+  "DSCF0817.jpg": {
+    "prefectureID": "hyogo",
+    "prefecture": {
+      "zh-Hant": "兵庫縣",
+      "ja": "兵庫県",
+      "en": "Hyogo"
+    },
+    "city": {
+      "zh-Hant": "神戶市",
+      "ja": "神戸市",
+      "en": "Kobe"
+    },
+    "location": {
+      "zh-Hant": "神戶港",
+      "ja": "神戸港",
+      "en": "Kobe Harbor"
+    },
+    "originalSha256": "69f00efd47b32720299d391a615ff5ad28942d0a359f072d26cdd8e5cd67bece"
+  },
+  "DSCF0829.jpg": {
+    "prefectureID": "hyogo",
+    "prefecture": {
+      "zh-Hant": "兵庫縣",
+      "ja": "兵庫県",
+      "en": "Hyogo"
+    },
+    "city": {
+      "zh-Hant": "神戶市",
+      "ja": "神戸市",
+      "en": "Kobe"
+    },
+    "location": {
+      "zh-Hant": "神戶臨海樂園",
+      "ja": "神戸ハーバーランド",
+      "en": "Kobe Harborland"
+    },
+    "originalSha256": "20601bcff53a6be90a91a19cb1286e0e271463d3ee28a103876ca42ee812168b"
+  }
+}

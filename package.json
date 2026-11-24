@@ -1,0 +1,23 @@
+{
+  "name": "canaria-frame",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "node scripts/build.js",
+    "photos:sync": "node scripts/cloudflare.js",
+    "photos:remove": "node scripts/cloudflare.js remove",
+    "deploy": "node scripts/cloudflare.js deploy",
+    "predev": "npm run build",
+    "dev": "node scripts/dev.js",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "exifr": "^7.1.3",
+    "sharp": "^0.35.5",
+    "wrangler": "^4.167.0"
+  }
+}

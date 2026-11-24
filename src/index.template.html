@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-Hant" data-langs="zh-Hant ja en" id="top">
+<head>
+    <!-- Document metadata -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>かなりあのピクセル</title>
+    <meta name="description" content="そこにある一瞬を永遠にしよう">
+    <meta name="theme-color" content="#f5f8fa">
+    <link rel="canonical" href="https://frame.canaria.cc/">
+    <!-- Social previews -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="canaria.cc">
+    <meta property="og:locale" content="zh_TW">
+    <meta property="og:url" content="https://frame.canaria.cc/">
+    <meta property="og:title" content="かなりあのピクセル">
+    <meta property="og:description" content="そこにある一瞬を永遠にしよう">
+    <meta property="og:image" content="https://frame.canaria.cc/assets/share.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="canaria.cc">
+    <meta name="twitter:title" content="かなりあのピクセル">
+    <meta name="twitter:description" content="そこにある一瞬を永遠にしよう">
+    <meta name="twitter:image" content="https://frame.canaria.cc/assets/share.jpg">
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="16x16" href="./assets/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32x32.png">
+    <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
+    <!-- Structured data -->
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "かなりあのピクセル",
+            "url": "https://frame.canaria.cc/"
+        }
+    </script>
+    <!-- Styles: shared UI, then page styles. -->
+    <link rel="stylesheet" href="https://canaria.cc/canaria.css?v=2">
+    <link rel="stylesheet" href="./main.css">
+    <!-- Set the theme and language before paint; defer the page module. -->
+    <script src="https://canaria.cc/canaria.js?v=2"></script>
+    <script type="module" src="./main.js"></script>
+    <noscript><style>.js-control { display: none !important }</style></noscript>
+</head>
+<body>
+    <a class="skip-link" href="#main" data-i18n="skip">跳至主要內容</a>
+    <!-- header -->
+    <main id="main" class="section-shell" tabindex="-1">
+        <section class="archive-section" aria-labelledby="view-heading">
+            <div class="archive-toolbar">
+                <div class="archive-toolbar-main">
+                    <h1 id="view-heading">時間軸</h1>
+                    <nav class="archive-switch js-control" aria-label="主要導覽" data-i18n-aria="nav">
+                        <a href="#timeline" data-view="timeline" aria-current="page" data-i18n="timeline">時間軸</a>
+                        <a href="#places" data-view="places" data-i18n="places">地點</a>
+                    </nav>
+                    <span class="archive-count" data-archive-count><!-- count --></span>
+                </div>
+                <div class="layout-switch archive-switch js-control" role="group" aria-label="照片排列方式" data-i18n-aria="layout">
+                    <button type="button" data-layout="masonry" aria-pressed="false" aria-label="瀑布流" data-i18n-aria="masonry">
+                        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 3h5v8H3zm9 0h5v4h-5zM3 14h5v3H3zm9-4h5v7h-5z"/></svg>
+                    </button>
+                    <button type="button" data-layout="grid" aria-pressed="true" aria-label="網格" data-i18n-aria="grid">
+                        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 3h5v5H3zm9 0h5v5h-5zM3 12h5v5H3zm9 0h5v5h-5z"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div id="archive"><!-- archive --></div>
+        </section>
+    </main>
+    <!-- footer -->
+    <script id="photo-data" type="application/json"><!-- photo-data --></script>
+</body>
+</html>
