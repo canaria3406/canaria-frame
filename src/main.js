@@ -7,7 +7,7 @@ const dictionaries = {
         footerHome: '首頁', footerNav: '頁尾導覽',
         backToTop: '回頁首', layout: '照片排列', masonry: '瀑布流', grid: '網格',
         viewer: '照片檢視器', prev: '上一張', next: '下一張', close: '關閉', info: '照片資訊',
-        download: '下載原圖', downloadPending: '正在下載原圖…', downloadFailed: '無法下載原圖，請稍後再試。',
+        download: '下載原圖', downloadFailed: '無法下載原圖，請稍後再試。', imagePending: '正在載入照片…', imageFailed: '無法載入照片。',
         prefecture: '都道府縣', city: '城市', location: '地點',
         capturedAt: '拍攝時間', camera: '相機', lens: '鏡頭', shutterSpeed: '快門',
         aperture: '光圈', iso: 'ISO', focalLength: '焦距',
@@ -23,7 +23,7 @@ const dictionaries = {
         footerHome: 'ホーム', footerNav: 'フッターナビゲーション',
         backToTop: 'ページの先頭へ', layout: '写真の配置', masonry: 'メイソンリー', grid: 'グリッド',
         viewer: 'フォトビューアー', prev: '前の写真', next: '次の写真', close: '閉じる', info: '写真情報',
-        download: '元の写真をダウンロード', downloadPending: '元の写真をダウンロード中…', downloadFailed: '元の写真をダウンロードできませんでした。しばらくしてから再試行してください。',
+        download: '元の写真をダウンロード', downloadFailed: '元の写真をダウンロードできません。しばらくしてから再試行してください。', imagePending: '写真を読み込み中…', imageFailed: '写真を読み込めませんでした。',
         prefecture: '都道府県', city: '市区町村', location: '撮影場所',
         capturedAt: '撮影日時', camera: 'カメラ', lens: 'レンズ', shutterSpeed: 'シャッター速度',
         aperture: '絞り', iso: 'ISO', focalLength: '焦点距離',
@@ -39,7 +39,7 @@ const dictionaries = {
         footerHome: 'Home', footerNav: 'Footer navigation',
         backToTop: 'Back to top', layout: 'Gallery layout', masonry: 'Masonry', grid: 'Grid',
         viewer: 'Photo viewer', prev: 'Previous photo', next: 'Next photo', close: 'Close', info: 'Photo information',
-        download: 'Download original', downloadPending: 'Downloading original…', downloadFailed: 'Could not download the original. Try again later.',
+        download: 'Download original', downloadFailed: 'Could not download the original. Try again later.', imagePending: 'Loading photo…', imageFailed: 'Could not load photo.',
         prefecture: 'Prefecture', city: 'City', location: 'Location',
         capturedAt: 'Captured', camera: 'Camera', lens: 'Lens', shutterSpeed: 'Shutter speed',
         aperture: 'Aperture', iso: 'ISO', focalLength: 'Focal length',
@@ -68,7 +68,6 @@ const symbols = {
     close: '<path d="m6 6 12 12M18 6 6 18"/>',
     info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-9v.2"/>',
     download: '<path d="M12 3v12m-5-5 5 5 5-5M4 16v4h16v-4"/>',
-    spinner: '<path d="M12 3a9 9 0 1 1-9 9"/>',
 };
 
 function icon(name) {
@@ -77,14 +76,17 @@ function icon(name) {
 
 const entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 const escapeHtml = value => String(value).replace(/[&<>"']/g, ch => entities[ch]);
-const unknownPlaces = new Set(Object.values(dictionaries).map(dictionary => dictionary.unknownPlace));
+const unknownPlaces = new Set(Object.values(dictionaries).map(dictionary => dictionary.unknownPlace.toLowerCase()));
 const placeKey = photo => photo.prefectureID === 'unknown' ? '~' : photo.prefectureID;
-const placeName = (group, lang) => group.map(photo => knownPlace(photo.prefecture, lang)).find(Boolean) || translate(lang, 'unknownPlace');
+function placeName(key, group, lang) {
+    if (key === '~') return translate(lang, 'unknownPlace');
+    return group.map(photo => knownPlace(photo.prefecture, lang)).find(Boolean) || translate(lang, 'unknownPlace');
+}
 const thumbnailSizes = '(max-width: 680px) calc(100vw - 32px), (min-width: 980px) min(calc((100vw - 62px) / 3), 386px), calc((100vw - 50px) / 2)';
 const eagerPhotoCount = 3;
 
 function knownPlace(value, lang) {
-    return [value?.[lang], ...Object.values(value ?? {})].find(text => text && !unknownPlaces.has(text));
+    return [value?.[lang], ...Object.values(value ?? {})].find(text => text && !unknownPlaces.has(text.toLowerCase()));
 }
 
 function groupBy(items, getKey) {
@@ -159,12 +161,12 @@ export function renderArchive(photos, { mode = 'timeline', place = null, lang = 
         const places = groupBy(photos, placeKey);
         const selected = places.get(place);
         if (selected) {
-            return `<nav class="place-crumb" aria-label="${t('places')}"><a href="#places">${t('allPlaces')}</a><span aria-hidden="true">/</span><h2>${escapeHtml(placeName(selected, lang))}</h2></nav>${photoGrid(selected, lang)}`;
+            return `<nav class="place-crumb" aria-label="${t('places')}"><a href="#places">${t('allPlaces')}</a><span aria-hidden="true">/</span><h2>${escapeHtml(placeName(place, selected, lang))}</h2></nav>${photoGrid(selected, lang)}`;
         }
         const covers = [...places.entries()].map(([key, group], i) => {
             const cover = group.find(photo => photo.width >= photo.height) ?? group[0];
             return `<a class="place-card" href="#places/${encodeURIComponent(key)}" data-reveal>${imageTag(cover, i)}
-                <span class="place-label"><strong>${escapeHtml(placeName(group, lang))}</strong><small>${t('photoCount', group.length)}</small></span>
+                <span class="place-label"><strong>${escapeHtml(placeName(key, group, lang))}</strong><small>${t('photoCount', group.length)}</small></span>
             </a>`;
         });
         return `<div class="places-grid">${covers.join('')}</div>`;
@@ -267,7 +269,7 @@ function createViewer(getLang) {
         <div class="lightbox-content">
             <div class="lightbox-media">
                 ${button('prev')}
-                <div class="lightbox-stage"><img class="lightbox-image" alt="" decoding="async"></div>
+                <div class="lightbox-stage"></div>
                 ${button('next')}
                 <p class="lightbox-caption"></p>
             </div>
@@ -276,13 +278,17 @@ function createViewer(getLang) {
             </aside>
         </div></div>`;
     document.body.append(dialog);
-    const image = dialog.querySelector('img');
+    const stage = dialog.querySelector('.lightbox-stage');
+    let image;
+    let imageStatus;
+    let loadingTimer;
+    let downloadCheck;
+    let downloadFailed = false;
     const details = dialog.querySelector('.lightbox-details');
     const properties = details.querySelector('dl');
     const infoButton = dialog.querySelector('[data-action="info"]');
     const downloadButton = dialog.querySelector('[data-action="download"]');
-    const downloadStatus = dialog.querySelector('.lightbox-status');
-    downloadButton.insertAdjacentHTML('beforeend', icon('spinner'));
+    const status = dialog.querySelector('.lightbox-status');
     let sequence = [];
     let index = 0;
     let opener;
@@ -309,12 +315,58 @@ function createViewer(getLang) {
         }
     }
 
+    function updateStatus() {
+        const key = downloadFailed ? 'downloadFailed' : imageStatus;
+        const message = key ? translate(getLang(), key) : '';
+        if (status.textContent !== message) status.textContent = message;
+    }
+
+    async function downloadOriginal() {
+        if (downloadCheck) return;
+        const { url, name } = sequence[index].original;
+        const check = new AbortController();
+        downloadCheck = check;
+        downloadButton.setAttribute('aria-disabled', 'true');
+        downloadFailed = false;
+        updateStatus();
+        try {
+            const response = await fetch(url, { method: 'HEAD', signal: check.signal });
+            if (!response.ok || !response.headers.get('Content-Type')?.startsWith('image/')) {
+                throw new Error('Original unavailable');
+            }
+            if (check.signal.aborted) return;
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = name;
+            link.click();
+        } catch {
+            if (!check.signal.aborted) {
+                downloadFailed = true;
+                updateStatus();
+            }
+        } finally {
+            if (downloadCheck === check) {
+                downloadCheck = null;
+                downloadButton.removeAttribute('aria-disabled');
+            }
+        }
+    }
+
+    function resetStatus() {
+        clearTimeout(loadingTimer);
+        downloadCheck?.abort();
+        downloadCheck = null;
+        downloadButton.removeAttribute('aria-disabled');
+        downloadFailed = false;
+        imageStatus = null;
+    }
+
     function render() {
         const photo = sequence[index];
         const lang = getLang();
         for (const node of dialog.querySelectorAll('[data-action]')) {
             const key = node.dataset.action;
-            const label = translate(lang, node === downloadButton && node.hasAttribute('aria-disabled') ? 'downloadPending' : key);
+            const label = translate(lang, key);
             node.setAttribute('aria-label', label);
             node.title = label;
             if (key === 'prev' || key === 'next') node.disabled = sequence.length < 2;
@@ -323,46 +375,34 @@ function createViewer(getLang) {
         details.setAttribute('aria-label', translate(lang, 'info'));
         dialog.querySelector('.lightbox-counter').textContent = `${index + 1} / ${sequence.length}`;
         dialog.querySelector('.lightbox-caption').textContent = photoCaption(photo, lang);
-        downloadButton.hidden = !photo.original;
-        image.width = photo.width;
-        image.height = photo.height;
-        if (image.getAttribute('src') !== photo.src) {
+        if (image?.getAttribute('src') !== photo.src) {
+            const next = document.createElement('img');
+            next.className = 'lightbox-image';
+            next.alt = '';
+            next.decoding = 'async';
+            next.width = photo.width;
+            next.height = photo.height;
+            const settle = key => {
+                if (image !== next) return;
+                clearTimeout(loadingTimer);
+                imageStatus = key;
+                updateStatus();
+            };
+            next.onload = () => settle(null);
+            next.onerror = () => settle('imageFailed');
+            loadingTimer = setTimeout(() => settle('imagePending'), 500);
+            image = next;
+            stage.replaceChildren(image);
             image.sizes = '100vw';
             image.srcset = (photo.variants || []).map(variant => variant.src + ' ' + variant.width + 'w').join(', ');
             image.src = photo.src;
         }
+        updateStatus();
         renderDetails(photo, lang);
-    }
-    async function downloadOriginal(photo) {
-        if (!photo?.original || downloadButton.getAttribute('aria-disabled') === 'true') return;
-        downloadButton.setAttribute('aria-disabled', 'true');
-        downloadButton.title = translate(getLang(), 'downloadPending');
-        downloadButton.setAttribute('aria-label', downloadButton.title);
-        downloadStatus.textContent = '';
-        try {
-            const response = await fetch(photo.original.url, { credentials: 'omit' });
-            if (!response.ok || !response.headers.get('Content-Type')?.startsWith('image/')) {
-                throw new Error('Original unavailable');
-            }
-            const url = URL.createObjectURL(await response.blob());
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = photo.original.name;
-            dialog.append(link);
-            link.click();
-            link.remove();
-            setTimeout(() => URL.revokeObjectURL(url), 30_000);
-        } catch {
-            downloadStatus.textContent = translate(getLang(), 'downloadFailed');
-        } finally {
-            downloadButton.removeAttribute('aria-disabled');
-            downloadButton.title = translate(getLang(), 'download');
-            downloadButton.setAttribute('aria-label', downloadButton.title);
-        }
     }
     function step(direction) {
         if (sequence.length < 2) return;
-        if (!downloadButton.hasAttribute('aria-disabled')) downloadStatus.textContent = '';
+        resetStatus();
         index = (index + direction + sequence.length) % sequence.length;
         render();
         details.scrollTop = 0;
@@ -370,9 +410,9 @@ function createViewer(getLang) {
     dialog.addEventListener('click', event => {
         const action = event.target.closest('button')?.dataset.action;
         if (event.target === dialog || action === 'close') dialog.close();
+        if (action === 'download') void downloadOriginal();
         if (action === 'prev') step(-1);
         if (action === 'next') step(1);
-        if (action === 'download') void downloadOriginal(sequence[index]);
         if (action === 'info') {
             details.hidden = !details.hidden;
             infoButton.setAttribute('aria-expanded', String(!details.hidden));
@@ -386,7 +426,6 @@ function createViewer(getLang) {
             step(event.key === 'ArrowRight' ? 1 : -1);
         }
     });
-    const stage = dialog.querySelector('.lightbox-stage');
     stage.addEventListener('touchstart', event => {
         touch = event.touches.length === 1
             ? { x: event.touches[0].clientX, y: event.touches[0].clientY } : null;
@@ -403,9 +442,10 @@ function createViewer(getLang) {
         document.body.classList.remove('lightbox-open');
         opener?.focus({ preventScroll: true });
         if (scroll) window.scrollTo({ left: scroll.x, top: scroll.y, behavior: 'instant' });
+        resetStatus();
         sequence = [];
-        image.removeAttribute('srcset');
-        image.removeAttribute('src');
+        image = null;
+        stage.replaceChildren();
     });
     return {
         open(link, photos, touchOpened) {
@@ -416,7 +456,6 @@ function createViewer(getLang) {
             opener = touchOpened ? null : link;
             if (touchOpened && document.activeElement?.closest('.photo-tile')) document.activeElement.blur();
             scroll = { x: window.scrollX, y: window.scrollY };
-            if (!downloadButton.hasAttribute('aria-disabled')) downloadStatus.textContent = '';
             details.hidden = true;
             infoButton.setAttribute('aria-expanded', 'false');
             render();

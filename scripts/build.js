@@ -64,6 +64,7 @@ export async function build({ requireSynced = false, projectDir = root } = {}) {
         const fillSlots = page => page.replace(/<!-- ([\w-]+) -->/g, (match, slot) => slots[slot] ?? match);
         await writeFile(path.join(site, 'index.html'), fillSlots(template));
         await writeFile(path.join(site, '404.html'), missingPage);
+        await writeFile(path.join(site, '_headers'), '/gallery/*\n  Cache-Control: public, max-age=31536000, immutable\n');
         const originals = Object.fromEntries(photos.map(photo => [photo.original.url, true]));
         await writeFile(path.join(site, originalsManifestPath), JSON.stringify(originals) + '\n');
         await writeFile(path.join(site, '_routes.json'), JSON.stringify({

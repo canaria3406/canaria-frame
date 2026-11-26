@@ -19,7 +19,7 @@ const exifFields = [
 ];
 const tokyoOffset = 9 * 60 * 60 * 1000;
 const unknownPlace = { 'zh-Hant': '未知', ja: '不明', en: 'Unknown' };
-const unknownValues = new Set(Object.values(unknownPlace));
+const unknownValues = new Set(Object.values(unknownPlace).map(name => name.toLowerCase()));
 
 async function imageFiles(directory, prefix = '') {
     const files = [];
@@ -57,7 +57,8 @@ function captureTime(input, defaultOffset) {
     if (hours && (Number(hours.slice(0, 2)) > 23 || Number(hours.slice(3)) > 59 || Number(seconds) > 59)) {
         return null;
     }
-    const zone = offset || defaultOffset || '+09:00';
+    const validOffset = /^(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/.test(defaultOffset);
+    const zone = offset || (validOffset ? defaultOffset : '+09:00');
     const normalized = day + 'T' + (hours || '00:00') + ':' + seconds + fraction + zone;
     const instant = Date.parse(normalized);
     if (!Number.isFinite(instant)) return null;
@@ -94,7 +95,7 @@ function normalizePlace(value, field) {
         const text = typeof value === 'string' ? value : value?.[lang];
         if (text != null && typeof text !== 'string') throw new Error('Invalid ' + field + '.' + lang);
         const name = text?.trim();
-        return [lang, name && !unknownValues.has(name) ? name : fallback];
+        return [lang, name && !unknownValues.has(name.toLowerCase()) ? name : fallback];
     }));
 }
 
@@ -105,7 +106,7 @@ function normalizePrefectureID(value, prefecture) {
         if (!/^[a-z0-9]+(?:[-_][a-z0-9]+)*$/.test(code)) throw new Error('Invalid prefectureID');
         return code;
     }
-    return unknownValues.has(prefecture.en) ? 'unknown' : slug(prefecture.en);
+    return unknownValues.has(prefecture.en.toLowerCase()) ? 'unknown' : slug(prefecture.en);
 }
 
 async function readAnnotations(catalogFile) {
@@ -140,7 +141,14 @@ export async function readPhotoCatalog(projectDir = root) {
         const file = legacyNames.get(key) ?? key;
         entries.set(file, entry);
     }
-    const matched = [...new Set([...files, ...entries.keys()])].sort().map(file => {
+    const names = [...new Set([...files, ...entries.keys()])].sort();
+    const spellings = new Map();
+    for (const file of names) {
+        const key = file.toLowerCase().normalize('NFC');
+        if (spellings.has(key)) throw new Error(file + ' 與 ' + spellings.get(key) + ' 的路徑只差大小寫或 Unicode 寫法，請統一名稱。');
+        spellings.set(key, file);
+    }
+    const matched = names.map(file => {
         if (!isPhotoPath(file)) throw new Error(file + ': 請使用 pic/ 下包含副檔名的相對路徑。');
         const entry = entries.get(file);
         if (entry != null && entry !== '' && (typeof entry !== 'object' || Array.isArray(entry))) {
@@ -163,7 +171,7 @@ export async function readPhotoCatalog(projectDir = root) {
             throw new Error(file + ': 無效的 r2Deletion。');
         }
         const deleted = entry?.deleted === true;
-        return { file, annotation, sha256, deleted, r2Deletion: deleted ? r2Deletion : undefined,
+        return { file, annotation, sourceEntry: entry, sha256, deleted, r2Deletion: deleted ? r2Deletion : undefined,
             present: files.has(file), annotated: entries.has(file) };
     });
     return { originals, catalogFile, source, matched };
@@ -172,8 +180,8 @@ export async function readPhotoCatalog(projectDir = root) {
 export async function savePhotoCatalog(catalog) {
     const { catalogFile, source, matched } = catalog;
     const stored = matched.filter(entry => entry.annotated || entry.sha256 || entry.deleted);
-    const updated = JSON.stringify(Object.fromEntries(stored.map(({ file, annotation, sha256, deleted, r2Deletion }) =>
-        [file, { ...annotation, originalSha256: sha256, deleted: deleted || undefined,
+    const updated = JSON.stringify(Object.fromEntries(stored.map(({ file, annotation, sourceEntry, sha256, deleted, r2Deletion }) =>
+        [file, { ...(deleted ? sourceEntry : annotation), originalSha256: sha256, deleted: deleted || undefined,
             r2Deletion }]
     )), null, 2) + '\n';
     if (updated !== source) {
@@ -201,7 +209,7 @@ export function reportPendingAnnotations(matched) {
         const incomplete = [];
         if (annotation.prefectureID === 'unknown') incomplete.push('prefectureID');
         for (const field of placeFields) {
-            if (Object.values(annotation[field]).some(value => unknownValues.has(value))) incomplete.push(field);
+            if (Object.values(annotation[field]).some(value => unknownValues.has(value.toLowerCase()))) incomplete.push(field);
         }
         if (incomplete.length) pending.push(file + ' · ' + incomplete.join(', '));
     }
@@ -222,7 +230,7 @@ async function writeWebP(buffer, width, previous, target) {
 async function processPhoto({ file, annotation, sha256 }, paths) {
     const buffer = await readLocalOriginal(paths.originals, file);
     const hash = originalHash(buffer);
-    if (sha256 && sha256 !== hash) throw new Error('本機原圖版本不同，請執行 npm run photos:sync。');
+    if (sha256 && sha256 !== hash) throw new Error('本機原圖版本不同，若是要另外收錄的新照片，請改名；若是舊版本或已刪除的照片，請刪除或移出 pic/。處理後再執行 npm run photos:sync。');
     const image = await sharp(buffer).metadata();
     // Read the embedded TIFF block regardless of the image container.
     const sourceExif = image.exif;

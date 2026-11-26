@@ -225,9 +225,6 @@ main:focus, #view-heading:focus { outline: none; }
 }
 .lightbox-status { position: absolute; z-index: 1; inset: auto 12px max(60px, env(safe-area-inset-bottom)); margin: 0 auto; width: fit-content; max-width: calc(100% - 24px); pointer-events: none; font-size: .85rem; }
 .lightbox-status:not(:empty) { padding: 6px 12px; border-radius: 6px; background: var(--ui-ink); color: var(--ui-bg); }
-.lightbox-download .spinner-icon, .lightbox-download[aria-disabled] .download-icon { display: none; }
-.lightbox-download[aria-disabled] .spinner-icon { display: block; animation: download-spin .8s linear infinite; }
-@keyframes download-spin { to { transform: rotate(1turn); } }
 .icon-button {
     display: grid;
     place-items: center;
@@ -246,9 +243,8 @@ main:focus, #view-heading:focus { outline: none; }
     border-color: var(--ui-line);
     background: var(--ui-action-bg);
 }
-.lightbox :is(button, .lightbox-details):focus-visible { outline: 2px solid var(--ui-accent); outline-offset: -2px; }
+.lightbox :is(.icon-button, .lightbox-details):focus-visible { outline: 2px solid var(--ui-accent); outline-offset: -2px; }
 .icon-button:disabled { opacity: .3; cursor: auto; }
-.icon-button[aria-disabled="true"] { opacity: .45; cursor: auto; }
 .lightbox-content {
     display: flex;
     flex: 1;
@@ -348,7 +344,6 @@ main:focus, #view-heading:focus { outline: none; }
     .lightbox-details { max-height: 40%; }
 }
 @media (prefers-reduced-motion: reduce) {
-    .lightbox-download[aria-disabled] .spinner-icon { animation: none; }
     .ui-reveal-ready [data-reveal] { opacity: 1; transform: none; transition: none; }
     .lightbox[open] { animation: none; }
     .lightbox .icon-button { transition: none; }

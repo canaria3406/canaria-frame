@@ -36,9 +36,9 @@ npm run dev
 | 有註記 | 缺檔 | 從 R2 下載。失敗就報錯，保留註記 |
 | 尚無註記 | 有檔案 | 上傳原圖，驗證成功後新增註記並填入未知地點 |
 | 有註記但尚無 SHA-256 | 有檔案 | 首次遷移時上傳一次，將 SHA-256 寫入同一筆註記 |
-| 有註記與 SHA-256 | 檔案版本不同 | 驗證下載的 R2 版本後換入 `pic/`，先前的本機版本備份至 `pic/.frame-backup-*` |
+| 有註記與 SHA-256 | 檔案版本不同 | 停止同步並保留本機檔案。若是要另外收錄的新照片，請改名。若是舊版本或已刪除的照片，請刪除或移出 `pic/`。重跑同步會還原註記中的有效照片 |
 
-使用相對於 `pic/` 的路徑，子資料夾以 `/` 分隔。`originalSha256` 由同步指令寫入，對應 R2 的 `originals/<SHA-256>`，相同內容可共用物件。第一次遷移若本機缺少原圖，腳本會嘗試 R2 中以相對路徑命名的舊物件，成功後再登錄 SHA-256。日後要替換同名原圖，先保留備份，再換掉本機檔案並移除該筆 `originalSha256`，然後重新同步。
+照片路徑只差大小寫或 Unicode 正規化形式時，請先統一名稱。使用相對於 `pic/` 的路徑，子資料夾以 `/` 分隔。`originalSha256` 由同步指令寫入，對應 R2 的 `originals/<SHA-256>`，相同內容可共用物件。第一次遷移若本機缺少原圖，腳本會嘗試 R2 中以相對路徑命名的舊物件，成功後再登錄 SHA-256。舊物件保留給尚未取得新版註記的裝置，待所有裝置更新且確認雜湊物件可還原後，可手動清理。日後要替換同名原圖，先保留備份，再換掉本機檔案並移除該筆 `originalSha256`，然後重新同步。
 
 `prefectureID` 是都道府縣分組鍵，`prefecture`、`city` 和 `location` 可使用三語物件或共用文字。同一都道府縣請沿用相同的 `prefectureID`。若有英文都道府縣名稱，同步會用它補上分組鍵，例如 `ishikawa`。地點未確認時填入 `unknown`，空白地名補成繁中「未知」、日文「不明」和英文「Unknown」。
 
@@ -68,7 +68,7 @@ npm run photos:remove -- "trip/照片.jpg"
 
 用 `pic/` 下的相對路徑指定要刪除的照片。指令會先在 `annotations.json` 將該筆設為 `deleted: true`，再刪除本機原圖和 R2 物件，並重建 `dist/` 移除展示用 WebP 和下載連結。其他原圖的上傳和下載由 `npm run photos:sync` 處理。若其他有效照片共用同一個 SHA-256，記錄 `r2Deletion: "shared"`，等最後一個有效引用移除時才刪除 R2 物件。完成雲端清理會記錄 `r2Deletion: "complete"`。失敗的刪除可重跑同一條刪除指令，或在下次 `npm run photos:sync` 重試。
 
-將更新後的 `annotations.json` 提交並推送到 Git。其他裝置 `git pull` 後執行 `npm run photos:sync`，會刪除同路徑的本機原圖，並更新仍含該照片的 `dist/`。保留刪除標記，避免舊裝置重新上傳。若同一檔名要重新使用，請先準備新的本機檔案，再清除該筆的 `deleted`、`r2Deletion` 與 `originalSha256`，執行同步重新上傳。
+將更新後的 `annotations.json` 提交並推送到 Git。其他裝置 `git pull` 後執行 `npm run photos:sync`，會核對 SHA-256 後刪除同路徑的本機原圖；缺少雜湊或內容不符時會保留檔案並報錯。若是當初要刪除的照片，請刪除或移出 `pic/` 後再同步。若是要收錄的同名新照片，請改名後再同步。同步成功後會更新仍含該照片的 `dist/`。保留刪除標記，避免舊裝置重新上傳。若同一檔名要重新使用，請先準備新的本機檔案，再清除該筆的 `deleted`、`r2Deletion` 與 `originalSha256`，執行同步重新上傳。
 
 執行 `npm run deploy` 更新正式站，該次部署的舊下載路徑會回傳 404。先前的 Pages 部署可能仍提供其靜態展示圖。Git 歷史和先前已下載的副本需另外處理。
 
@@ -106,7 +106,7 @@ npm run deploy
 
 切換網域前，先在 Pages 的 **Custom domains** 加入 `frame.canaria.cc`，依指示將 `frame` 的 CNAME 改到專案的 `pages.dev` 網址。確認正式站 HTTPS、展示圖與原圖下載後，再停用 GitHub Pages。本機原圖放在 Git 忽略的 `pic/`；新裝置可用 `npm run photos:sync` 從 R2 還原。Cloudflare Pages 的部署目錄為 `dist/`。[Pages 自訂網域](https://developers.cloudflare.com/pages/configuration/custom-domains/)
 
-原圖上傳前會以 Cloudflare 的 bucket 用量加上本次新增檔案的大小做檢查，預設門檻是 8 GB。若同一帳戶有其他 R2 bucket，可在 `.env` 降低 `FRAME_R2_MAX_BYTES`。Cloudflare 回報的容量是估計值，帳戶的所有用量仍需一起核對。只有原圖下載走 Pages Function，每次至多讀取 R2 一次。展示用檔案由 Pages 免費提供。[R2 計價](https://developers.cloudflare.com/r2/pricing/) · [Pages Functions 計價](https://developers.cloudflare.com/pages/functions/pricing/)
+原圖上傳前會以 Cloudflare 的 bucket 用量加上本次新增檔案的大小做檢查，預設門檻是 8 GB。若同一帳戶有其他 R2 bucket，可在 `.env` 降低 `FRAME_R2_MAX_BYTES`。Cloudflare 回報的容量是估計值，帳戶的所有用量仍需一起核對。只有原圖下載走 Pages Function，燈箱會先以 HEAD 確認原圖可用，再由瀏覽器下載檔案，每個請求至多讀取 R2 一次。展示用檔案由 Pages 免費提供。[R2 計價](https://developers.cloudflare.com/r2/pricing/) · [Pages Functions 計價](https://developers.cloudflare.com/pages/functions/pricing/)
 
 ## 專案結構
 
@@ -120,7 +120,9 @@ npm run deploy
 | `scripts/build-photos.js` | 讀取照片註記、擷取 EXIF 並輸出 WebP |
 | `scripts/sync-photos.js`、`scripts/cloudflare.js` | 原圖同步、R2 與 Pages 發布 |
 | `functions/originals/[[photo]].js` | Pages 的原圖下載路由 |
-| `scripts/build-photos.test.js` | 照片轉檔與資料同步測試 |
+| `scripts/original-files.js`、`src/originals.js` | 本機原圖讀取與雜湊、共用原圖路徑與格式規則 |
+| `scripts/build-photos.test.js` | 照片轉檔、EXIF 和地點顯示測試 |
+| `scripts/sync-photos.test.js` | 原圖同步、刪除與下載路由測試 |
 | `scripts/build.js`、`scripts/dev.js` | 正式建置與本機預覽 |
 | `dist/` | 本機生成的 Cloudflare Pages 發布檔案 |
 

@@ -74,6 +74,9 @@ const storage = {
 const command = process.argv[2];
 const deleted = new Set();
 try {
+    if (![undefined, 'sync', 'remove', 'deploy'].includes(command)) {
+        throw new Error('未知指令 ' + command + '。可用指令為 sync、remove、deploy。');
+    }
     const catalog = await readPhotoCatalog(root);
     if (command === 'remove') {
         const file = process.argv[3];

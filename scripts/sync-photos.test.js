@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { cp, mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -97,7 +97,7 @@ test('missing or corrupt R2 originals stop sync without saving annotations or pa
     assert.deepEqual(calls, [['get', key], ['get', key]]);
 });
 
-test('legacy entries are registered, and a mismatched local version is backed up', async t => {
+test('a filename conflict stops sync until renamed, then both photos and the legacy entry sync', async t => {
     const currentPhoto = Buffer.from('catalog version');
     const previousPhoto = Buffer.from('local version');
     const legacyPhoto = Buffer.from('legacy object');
@@ -107,10 +107,12 @@ test('legacy entries are registered, and a mismatched local version is backed up
         'same.jpg': { originalSha256: hash }, [legacy]: { city: 'Tokyo' },
     }, new Map([[originalKey(hash), currentPhoto], [legacy, legacyPhoto]]));
     await writeFile(path.join(photos, 'same.jpg'), previousPhoto);
+    await assert.rejects(syncPhotos(project, storage), /same.jpg：本機檔案與已登錄/);
+    assert.deepEqual(await readFile(path.join(photos, 'same.jpg')), previousPhoto);
+    await rename(path.join(photos, 'same.jpg'), path.join(photos, 'another.jpg'));
     await syncPhotos(project, storage);
     assert.deepEqual(await readFile(path.join(photos, 'same.jpg')), currentPhoto);
-    const backup = (await readdir(photos)).find(name => name.startsWith('.frame-backup-'));
-    assert.deepEqual(await readFile(path.join(photos, backup, 'same.jpg')), previousPhoto);
+    assert.deepEqual(await readFile(path.join(photos, 'another.jpg')), previousPhoto);
     const data = JSON.parse(await readFile(catalog, 'utf8'));
     assert.equal(data[legacy].city.en, 'Tokyo');
     assert.equal(data[legacy].originalSha256, originalHash(legacyPhoto));
@@ -143,6 +145,7 @@ test('deletion removes the local and remote original and rebuilds published file
     await writeFile(path.join(photos, 'kept.jpg'), kept);
     await build({ projectDir: project });
     const dist = path.join(project, 'dist');
+    assert.equal(await readFile(path.join(dist, '_headers'), 'utf8'), '/gallery/*\n  Cache-Control: public, max-age=31536000, immutable\n');
     const gallery = path.join(dist, 'gallery');
     assert.ok((await readdir(gallery)).some(name => name.startsWith('removed.')));
 
@@ -156,7 +159,7 @@ test('deletion removes the local and remote original and rebuilds published file
     assert.equal(deleted.deleted, true);
     assert.equal(deleted.r2Deletion, 'complete');
     assert.equal(deleted.originalSha256, removedHash);
-    assert.equal(deleted.city.en, 'Osaka');
+    assert.deepEqual(deleted, { city: 'Osaka', deleted: true, originalSha256: removedHash, r2Deletion: 'complete' });
 
     const deletedPaths = new Set(['removed.jpg']);
     assert.equal(await buildHasDeletedPhotos(project, deletedPaths), true);
@@ -294,4 +297,50 @@ test('Pages downloads the original bytes with one R2 read and preserves the down
     const removed = await onRequest({ request: new Request(new URL(originalUrl(hash, 'deleted.jpg'), url)), env });
     assert.equal(removed.status, 404);
     assert.deepEqual(calls, [['get', originalKey(hash)], ['head', originalKey(hash)]]);
+});
+
+test('automatic deletion preserves unrelated local files and never infers a remote hash', async t => {
+    for (const r2Deletion of [undefined, 'complete']) {
+        for (const originalSha256 of [undefined, originalHash(Buffer.from('old'))]) {
+            const { project, photos, catalog, initial, calls, storage } = await fixture(t, {
+                'same.jpg': { deleted: true, r2Deletion, originalSha256 },
+            });
+            const target = path.join(photos, 'same.jpg');
+            await writeFile(target, 'new');
+            await assert.rejects(syncPhotos(project, storage), /same.jpg 已標記刪除/);
+            assert.equal(await readFile(target, 'utf8'), 'new');
+            assert.equal(await readFile(catalog, 'utf8'), initial);
+            assert.deepEqual(calls, []);
+        }
+    }
+});
+
+test('ambiguous case and Unicode spellings stop sync before storage access', async t => {
+    for (const alias of ['CAFÉ.JPG', 'cafe\u0301.jpg']) {
+        const { project, photos, calls, storage } = await fixture(t, { [alias]: { deleted: true } });
+        await writeFile(path.join(photos, 'café.jpg'), 'photo');
+        await assert.rejects(syncPhotos(project, storage), /路徑只差大小寫或 Unicode/);
+        assert.deepEqual(calls, []);
+    }
+});
+
+test('retry uploads only content that has not passed verification', async t => {
+    const { project, photos, catalog, calls, storage } = await fixture(t, {});
+    for (const [file, bytes] of [['a.jpg', 'first'], ['b.jpg', 'second'], ['c.jpg', 'first']]) {
+        await writeFile(path.join(photos, file), bytes);
+    }
+    const second = originalKey(originalHash(Buffer.from('second')));
+    const upload = storage.upload;
+    storage.upload = (...args) => {
+        if (args[0] === second) throw new Error('interrupted');
+        return upload(...args);
+    };
+    await assert.rejects(syncPhotos(project, storage), /interrupted/);
+    const saved = JSON.parse(await readFile(catalog, 'utf8'));
+    assert.deepEqual(Object.keys(saved), ['a.jpg', 'c.jpg']);
+    assert.equal(saved['a.jpg'].originalSha256, saved['c.jpg'].originalSha256);
+    calls.length = 0;
+    storage.upload = upload;
+    await syncPhotos(project, storage);
+    assert.deepEqual(calls, [['budget', 6], ['put', second, 'image/jpeg'], ['get', second]]);
 });

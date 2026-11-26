@@ -30,7 +30,7 @@ test('the archive keeps capture order and orientation without publishing origina
         ExposureTime: '1/125', FNumber: '28/10', ISOSpeedRatings: '400', FocalLength: '23/1', LensModel: 'Example Lens',
     };
     await writeFile(path.join(sources, 'a.jpg'), await camera('red', tags));
-    await writeFile(path.join(sources, 'b.jpg'), await camera('blue', { DateTimeOriginal: '2026:01:01 00:15:00' }));
+    await writeFile(path.join(sources, 'b.jpg'), await camera('blue', { DateTimeOriginal: '2026:01:01 00:15:00', OffsetTimeOriginal: '   :  ' }));
     await writeFile(annotations, '');
     const warnings = t.mock.method(console, 'warn', () => {});
 
@@ -39,6 +39,7 @@ test('the archive keeps capture order and orientation without publishing origina
     assert.equal(first.date, '2026-01-01');
     assert.equal(second.original.name, 'b.jpg');
     assert.equal(second.date, '2026-01-01');
+    assert.equal(second.capturedAt, '2025-12-31T15:15:00.000Z');
     assert.equal(first.capturedAt, '2025-12-31T15:45:00.000Z');
     assert.deepEqual(first.exif, {
         shutterSpeed: '1/125 s', aperture: 'ƒ/2.8', iso: 400, focalLength: '23 mm',
@@ -86,6 +87,7 @@ test('build previews normalized places and keeps the annotations untouched', asy
     await assert.rejects(buildPhotos(output, project), /缺少本機原圖[\s\S]*removed\.jpg/);
     assert.equal(await readFile(catalog, 'utf8'), JSON.stringify(data));
     delete data['removed.jpg'];
+    data[annotationKey] = { prefecture: { ja: '京都府' }, location: 'unknown' };
     await writeFile(catalog, JSON.stringify(data));
 
     const photos = await buildPhotos(output, project);
@@ -97,6 +99,10 @@ test('build previews normalized places and keeps the annotations untouched', asy
     assert.deepEqual(existingPhoto.location, unknown);
     const newPhoto = photos.find(item => item.original.name === filename);
     assert.deepEqual(newPhoto.location, unknown);
+    for (const place of [null, '~']) {
+        const html = renderArchive(photos, { mode: 'places', place, lang: 'ja' });
+        assert.match(html, place ? /<h2>不明<\/h2>/ : /<strong>不明<\/strong>/);
+    }
     assert.deepEqual(newPhoto.original, {
         url: `/originals/${originalHash(photo)}/trip/%E6%B5%B7%E8%BE%BA%20%231.jpg`,
         name: filename,
