@@ -309,6 +309,44 @@ main:focus, #view-heading:focus { outline: none; }
 .lightbox-details dl > div + div { border-top: 1px solid var(--ui-line); }
 .lightbox-details dt { color: var(--ui-muted); }
 .lightbox-details dd { margin: 2px 0 0; font-weight: 550; overflow-wrap: anywhere; }
+@media (min-width: 2000px) {
+    .lightbox {
+        --viewer-height: min(90dvh, 1560px);
+        --gutter: clamp(20px, 1.5vw, 40px);
+        --details-width: 19rem;
+        --sidebar: calc(var(--details-width) + var(--gutter));
+        /* Reserve space for the toolbar, caption and navigation around the image. */
+        --stage-height: calc(var(--viewer-height) - 120px - var(--gutter));
+        box-sizing: border-box;
+        width: min(94vw, calc(var(--stage-height) * 1.5 + 100px + 4 * var(--gutter) + var(--sidebar)));
+        height: var(--viewer-height);
+    }
+    .lightbox-bar { padding-inline: var(--gutter); }
+    .lightbox-content {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) var(--details-width);
+        grid-template-rows: minmax(0, 1fr);
+        gap: var(--gutter);
+        padding: 0 var(--gutter) var(--gutter);
+    }
+    .lightbox-media {
+        column-gap: var(--gutter);
+        --offset: var(--sidebar);
+    }
+    .lightbox.details-open .lightbox-media {
+        --offset: 0px;
+    }
+    .lightbox-stage, .lightbox-caption { transform: translateX(calc(var(--offset) / 2)); }
+    .lightbox-next { transform: translateX(var(--offset)); }
+    @media (prefers-reduced-motion: no-preference) {
+        .lightbox-stage, .lightbox-caption, .lightbox-next { transition: transform .24s ease-in-out; }
+    }
+    .lightbox-details {
+        min-width: 0;
+        z-index: 1;
+        background-color: var(--ui-bg);
+    }
+}
 @media (max-width: 900px) {
     .lightbox-content { flex-direction: column; }
     .lightbox-details { flex: 0 1 auto; max-height: 38%; }

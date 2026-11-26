@@ -400,6 +400,12 @@ function createViewer(getLang) {
         updateStatus();
         renderDetails(photo, lang);
     }
+    function showDetails(show) {
+        details.hidden = !show;
+        dialog.classList.toggle('details-open', show);
+        infoButton.setAttribute('aria-expanded', String(show));
+        if (show) details.scrollTop = 0;
+    }
     function step(direction) {
         if (sequence.length < 2) return;
         resetStatus();
@@ -413,11 +419,7 @@ function createViewer(getLang) {
         if (action === 'download') void downloadOriginal();
         if (action === 'prev') step(-1);
         if (action === 'next') step(1);
-        if (action === 'info') {
-            details.hidden = !details.hidden;
-            infoButton.setAttribute('aria-expanded', String(!details.hidden));
-            if (!details.hidden) details.scrollTop = 0;
-        }
+        if (action === 'info') showDetails(details.hidden);
     });
     dialog.addEventListener('keydown', event => {
         if (event.altKey || event.ctrlKey || event.metaKey) return;
@@ -439,6 +441,7 @@ function createViewer(getLang) {
     }, { passive: true });
     stage.addEventListener('touchcancel', () => { touch = null; }, { passive: true });
     dialog.addEventListener('close', () => {
+        if (dialog.open) return;
         document.body.classList.remove('lightbox-open');
         opener?.focus({ preventScroll: true });
         if (scroll) window.scrollTo({ left: scroll.x, top: scroll.y, behavior: 'instant' });
@@ -456,8 +459,9 @@ function createViewer(getLang) {
             opener = touchOpened ? null : link;
             if (touchOpened && document.activeElement?.closest('.photo-tile')) document.activeElement.blur();
             scroll = { x: window.scrollX, y: window.scrollY };
-            details.hidden = true;
-            infoButton.setAttribute('aria-expanded', 'false');
+            resetStatus();
+            image = null;
+            showDetails(false);
             render();
             document.body.classList.add('lightbox-open');
             const initialFocus = dialog.querySelector(touchOpened ? '.lightbox-shell' : '[data-action="close"]');
